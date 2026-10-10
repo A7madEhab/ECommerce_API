@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace E_Commerce.Domain.Entities
 {
-    public class ProductCategory:BaseEntity<int>
+    public class ProductType : BaseEntity<int>
     {
         public List<Product> Products { get; set; } = new List<Product>();
     }

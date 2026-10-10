@@ -1,11 +1,13 @@
-
+using E_Commerce.Api.Extensions;
+using E_Commerce.Domain.Contracts;
+using E_Commerce.Domain.Contracts;
 using E_Commerce.Infrastructure;
-
+using System.Threading.Tasks;
 namespace E_Commerce.Api
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +20,7 @@ namespace E_Commerce.Api
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
-
+            await app.SeedMigrationDataAsync();
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {

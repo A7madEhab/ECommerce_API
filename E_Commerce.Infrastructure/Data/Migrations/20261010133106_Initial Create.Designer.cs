@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace E_Commerce.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(StoreDbContext))]
-    [Migration("20261008154949_Initail Create")]
-    partial class InitailCreate
+    [Migration("20261010133106_Initial Create")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -35,9 +35,6 @@ namespace E_Commerce.Infrastructure.Data.Migrations
                     b.Property<int>("BrandId")
                         .HasColumnType("int");
 
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(500)
@@ -48,19 +45,24 @@ namespace E_Commerce.Infrastructure.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("pictureUrl")
+                    b.Property<string>("PictureUrl")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("TypeId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("BrandId");
 
-                    b.ToTable("Product");
+                    b.HasIndex("TypeId");
+
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("E_Commerce.Domain.Entities.ProductBrand", b =>
@@ -77,10 +79,10 @@ namespace E_Commerce.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ProductBrand");
+                    b.ToTable("ProductBrands");
                 });
 
-            modelBuilder.Entity("E_Commerce.Domain.Entities.ProductCategory", b =>
+            modelBuilder.Entity("E_Commerce.Domain.Entities.ProductType", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -94,7 +96,7 @@ namespace E_Commerce.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ProductCategory");
+                    b.ToTable("ProductTypes");
                 });
 
             modelBuilder.Entity("E_Commerce.Domain.Entities.Product", b =>
@@ -105,15 +107,15 @@ namespace E_Commerce.Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("E_Commerce.Domain.Entities.ProductCategory", "ProductCategory")
+                    b.HasOne("E_Commerce.Domain.Entities.ProductType", "ProductType")
                         .WithMany("Products")
-                        .HasForeignKey("BrandId")
+                        .HasForeignKey("TypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("ProductBrand");
 
-                    b.Navigation("ProductCategory");
+                    b.Navigation("ProductType");
                 });
 
             modelBuilder.Entity("E_Commerce.Domain.Entities.ProductBrand", b =>
@@ -121,7 +123,7 @@ namespace E_Commerce.Infrastructure.Data.Migrations
                     b.Navigation("Products");
                 });
 
-            modelBuilder.Entity("E_Commerce.Domain.Entities.ProductCategory", b =>
+            modelBuilder.Entity("E_Commerce.Domain.Entities.ProductType", b =>
                 {
                     b.Navigation("Products");
                 });
