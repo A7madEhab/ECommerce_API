@@ -14,7 +14,7 @@ namespace E_Commerce.Infrastructure.Repositories
     {
         public void Add(TEnitiy entity)=>_storeDbContext.Add(entity);
 
-        public async Task<IReadOnlyCollection<TEnitiy>> GetAllAsync(CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<TEnitiy>> GetAllAsync(CancellationToken cancellationToken = default)
         {
           return await  _storeDbContext.Set<TEnitiy>().ToListAsync(cancellationToken);
         }

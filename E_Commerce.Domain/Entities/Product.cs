@@ -9,7 +9,6 @@ namespace E_Commerce.Domain.Entities
 {
     public class Product: BaseEntity<int>
     {
-
         public string Description { get; set; } = string.Empty;
         public string PictureUrl { get; set; } = string.Empty;
         public decimal Price { get; set; }
