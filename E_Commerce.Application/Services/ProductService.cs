@@ -2,6 +2,7 @@
 using E_Commerce.Application.Contracts;
 using E_Commerce.Application.DTOs;
 using E_Commerce.Application.Shared;
+using E_Commerce.Application.Specifications;
 using E_Commerce.Domain.Contracts;
 using E_Commerce.Domain.Entities;
 using System;
@@ -42,7 +43,8 @@ namespace E_Commerce.Application.Services
 
         public async Task<Result<IReadOnlyList<ProductDTO>>> GetAllProductsAsync(CancellationToken ct = default)
         {
-            var products = await unitOfWork.GetRepository<Product, int>().GetAllAsync(ct);
+            var specs = new ProductWithTypeAndBrandsSpecifications();
+            var products = await unitOfWork.GetRepository<Product, int>().GetAllAsync(specs,ct);
             var result = mapper.Map<IReadOnlyList<ProductDTO>>(products);
 
             // Returning an empty list on Success (HTTP 200) is standard REST practice

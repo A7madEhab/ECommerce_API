@@ -19,6 +19,12 @@ namespace E_Commerce.Infrastructure.Repositories
           return await  _storeDbContext.Set<TEnitiy>().ToListAsync(cancellationToken);
         }
 
+        public async Task<IReadOnlyList<TEnitiy>> GetAllAsync(ISpecifications<TEnitiy, Tkey> specifications, CancellationToken cancellationToken = default)
+        {
+           var query = SpecificationsEvaluator.CreateQuery(_storeDbContext.Set<TEnitiy>(), specifications);
+            return  await query.ToListAsync(cancellationToken);
+        }
+
         public async Task<TEnitiy?> GetByIdAsync(Tkey id, CancellationToken cancellationToken = default)
         {
             return await _storeDbContext.Set<TEnitiy>().FirstOrDefaultAsync(e => e.Id!.Equals(id),cancellationToken);
@@ -33,5 +39,6 @@ namespace E_Commerce.Infrastructure.Repositories
         {
             _storeDbContext.Update(entity);
         }
+
     }
 }
