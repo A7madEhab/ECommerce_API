@@ -2,6 +2,7 @@
 using E_Commerce.Application.Contracts;
 using E_Commerce.Application.DTOs;
 using E_Commerce.Application.Shared;
+using E_Commerce.Application.Specifications;
 using E_Commerce.Domain.Contracts;
 using E_Commerce.Domain.Entities;
 using System;
@@ -25,9 +26,10 @@ namespace E_Commerce.Application.Services
 
         public async Task<Result<ProductDTO>> GetProductByIdAsync(int id, CancellationToken ct = default)
         {
-            var product = await unitOfWork.GetRepository<Product, int>().GetByIdAsync(id, ct);
+            // Use Specification to ensure Brand and Type are JOINed and loaded
+            var spec = new ProductWithBrandAndTypeSpecification(id);
+            var product = await unitOfWork.GetRepository<Product, int>().GetByIdWithSpecAsync(spec, ct);
 
-            // 1. Guard against non-existent entities
             if (product is null)
             {
                 return Error.NotFound(
@@ -42,15 +44,18 @@ namespace E_Commerce.Application.Services
 
         public async Task<Result<IReadOnlyList<ProductDTO>>> GetAllProductsAsync(CancellationToken ct = default)
         {
-            var products = await unitOfWork.GetRepository<Product, int>().GetAllAsync(ct);
+            // Use Specification to include Brand and Type for all products
+            var spec = new ProductWithBrandAndTypeSpecification();
+            var products = await unitOfWork.GetRepository<Product, int>().GetAllWithSpecAsync(spec, ct);
+
             var result = mapper.Map<IReadOnlyList<ProductDTO>>(products);
 
-            // Returning an empty list on Success (HTTP 200) is standard REST practice
             return Result.Success(result);
         }
 
         public async Task<Result<IReadOnlyList<BrandDTO>>> GetAllBrandsAsync(CancellationToken ct = default)
         {
+            // Brands and Types don't have nested relations, so standard GetAll is fine here
             var brands = await unitOfWork.GetRepository<ProductBrand, int>().GetAllAsync(ct);
             var result = mapper.Map<IReadOnlyList<BrandDTO>>(brands);
 

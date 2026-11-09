@@ -1,6 +1,7 @@
 ﻿using E_Commerce.Domain.Contracts;
 using E_Commerce.Domain.Entities;
 using E_Commerce.Infrastructure.Data;
+using E_Commerce.Infrastructure.Specefications;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -10,28 +11,61 @@ using System.Threading.Tasks;
 
 namespace E_Commerce.Infrastructure.Repositories
 {
-    internal class GenericRepository<TEnitiy, Tkey> (StoreDbContext _storeDbContext): IGenericRepository<TEnitiy, Tkey> where TEnitiy : BaseEntity<Tkey>
+    public class GenericRepository<TEntity, TKey> : IGenericRepository<TEntity, TKey>
+            where TEntity : BaseEntity<TKey>
     {
-        public void Add(TEnitiy entity)=>_storeDbContext.Add(entity);
+        protected readonly DbContext _context;
 
-        public async Task<IReadOnlyList<TEnitiy>> GetAllAsync(CancellationToken cancellationToken = default)
+        public GenericRepository(DbContext context)
         {
-          return await  _storeDbContext.Set<TEnitiy>().ToListAsync(cancellationToken);
+            _context = context;
         }
 
-        public async Task<TEnitiy?> GetByIdAsync(Tkey id, CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<TEntity>> GetAllAsync(CancellationToken ct = default)
         {
-            return await _storeDbContext.Set<TEnitiy>().FirstOrDefaultAsync(e => e.Id!.Equals(id),cancellationToken);
+            return await _context.Set<TEntity>().ToListAsync(ct);
         }
 
-        public void Remove(TEnitiy entity)
+        public async Task<TEntity> GetByIdAsync(TKey id, CancellationToken ct = default)
         {
-          _storeDbContext.Remove(entity);
+            // Pass cancellation token to FindAsync
+            return await _context.Set<TEntity>().FindAsync(new object[] { id }, ct);
         }
 
-        public void Update(TEnitiy entity)
+        public async Task<IReadOnlyList<TEntity>> GetAllWithSpecAsync(ISpecifications<TEntity, TKey> spec, CancellationToken ct = default)
         {
-            _storeDbContext.Update(entity);
+            return await ApplySpecification(spec).ToListAsync(ct);
+        }
+
+        public async Task<TEntity> GetByIdWithSpecAsync(ISpecifications<TEntity, TKey> spec, CancellationToken ct = default)
+        {
+            return await ApplySpecification(spec).FirstOrDefaultAsync(ct);
+        }
+
+        public async Task<int> GetCountAsync(ISpecifications<TEntity, TKey> spec, CancellationToken ct = default)
+        {
+            return await ApplySpecification(spec).CountAsync(ct);
+        }
+
+        public async Task AddAsync(TEntity entity, CancellationToken ct = default)
+        {
+            await _context.Set<TEntity>().AddAsync(entity, ct);
+        }
+
+        public void Update(TEntity entity)
+        {
+            _context.Set<TEntity>().Update(entity);
+        }
+
+        public void Delete(TEntity entity)
+        {
+            _context.Set<TEntity>().Remove(entity);
+        }
+
+        // Private helper to wrap the query evaluation logic with specifications
+        private IQueryable<TEntity> ApplySpecification(ISpecifications<TEntity, TKey> spec)
+        {
+            return SpecificationEvaluator<TEntity, TKey>.GetQuery(_context.Set<TEntity>(), spec);
         }
     }
 }
